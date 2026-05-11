@@ -7,16 +7,13 @@ import ma.enset.aarroub.wijdane.aarroub_wijdane_exam_jee.repositories.VehicleRep
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
-import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration;
+//import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
+//import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
 import java.util.Date;
 
-@SpringBootApplication(exclude = {
-        SecurityAutoConfiguration.class,
-        UserDetailsServiceAutoConfiguration.class
-})
+@SpringBootApplication
 public class AarroubWijdaneExamJeeApplication {
 
     public static void main(String[] args) {
@@ -33,7 +30,6 @@ public class AarroubWijdaneExamJeeApplication {
                     .build();
             agenceRepository.save(agence1);
 
-            // Création d'une voiture
             Voiture voiture = new Voiture();
             voiture.setMarque("Toyota");
             voiture.setModele("Corolla");
