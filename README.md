@@ -22,51 +22,57 @@
 ## 🗂 Project Structure
 
 ```
-src/main/java/ma/enset/aarroub/wijdane/aarroub_wijdane_exam_jee/
-│
-├── entities/
-│   ├── Agence.java            # Agency entity
-│   ├── Vehicle.java           # Abstract base vehicle (Single-Table Inheritance)
-│   ├── Voiture.java           # Car subclass (portes, carburant, boite)
-│   ├── Moto.java              # Motorcycle subclass (cylindree, typeMoto, casque)
-│   └── Location.java          # Rental record
-│
-├── enums/
-│   ├── VehicleStatus.java     # DISPONIBLE | LOUE | EN_MAINTENANCE
-│   ├── TypeCarburant.java     # ESSENCE | DIESEL | HYBRIDE | ELECTRIQUE
-│   ├── BoiteVitesse.java      # MANUELLE | AUTOMATIQUE
-│   └── TypeMoto.java          # SPORTIVE | SCOOTER | ROADSTER | TOURING
-│
-├── repositories/
-│   ├── AgenceRepository.java
-│   ├── VehicleRepository.java
-│   └── LocationRepository.java
-│
-├── dtos/
-│   ├── AgenceDTO.java
-│   ├── VehicleDTO.java
-│   ├── VoitureDTO.java
-│   ├── MotoDTO.java
-│   ├── LocationDTO.java
-│   ├── AuthRequest.java
-│   └── AuthResponse.java
-│
-├── mappers/
-│   └── RentalMapper.java      # Entity <-> DTO conversion
-│
-├── services/
-│   ├── RentalService.java     # Service interface
-│   └── RentalServiceImpl.java # Business logic implementation
-│
-├── security/
-│   ├── SecurityConfig.java        # Filter chain & role-based rules
-│   ├── JwtUtil.java               # Token generation & validation
-│   ├── JwtAuthorizationFilter.java# Request filter
-│   └── CorsConfig.java            # CORS configuration
-│
-└── web/
-    ├── AuthController.java        # POST /api/auth/login
-    └── RentalRestController.java  # Agences & Vehicles endpoints
+backend/
+├── pom.xml
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── ma/enset/aarroub/wijdane/aarroub_wijdane_exam_jee/
+    │   │       │
+    │   │       ├── AarroubWijdaneExamJeeApplication.java   # @SpringBootApplication + CommandLineRunner (seed data)
+    │   │       │
+    │   │       ├── entities/
+    │   │       │   ├── Agence.java       # Agency — id, nom, adresse, ville, telephone
+    │   │       │   ├── Vehicle.java      # Abstract base — Single-Table Inheritance (@Inheritance STI)
+    │   │       │   ├── Voiture.java      # discriminator = "VOI" — nombrePortes, typeCarburant, boiteVitesse
+    │   │       │   ├── Moto.java         # discriminator = "MOT" — cylindree, typeMoto, casqueInclus
+    │   │       │   └── Location.java     # Rental record — dateDebut, dateFin, montantTotal
+    │   │       │
+    │   │       ├── enums/
+    │   │       │   └── VehicleStatus.java   # DISPONIBLE | LOUE | EN_MAINTENANCE
+    │   │       │
+    │   │       ├── repositories/
+    │   │       │   ├── AgenceRepository.java     # JPA repository for Agence
+    │   │       │   ├── VehicleRepository.java    # JPA repository for Vehicle (covers Voiture & Moto)
+    │   │       │   └── LocationRepository.java   # JPA repository for Location
+    │   │       │
+    │   │       ├── dtos/
+    │   │       │   ├── AgenceDTO.java     # Agency response payload
+    │   │       │   ├── VehicleDTO.java    # Vehicle response payload (shared for Voiture & Moto)
+    │   │       │   ├── AuthRequest.java   # { username, password }
+    │   │       │   └── AuthResponse.java  # { token }
+    │   │       │
+    │   │       ├── mappers/
+    │   │       │   └── RentalMapper.java   # Entity ↔ DTO conversion
+    │   │       │
+    │   │       ├── services/
+    │   │       │   └── RentalService.java   # Business logic (single class, no separate interface)
+    │   │       │
+    │   │       ├── security/
+    │   │       │   ├── SecurityConfig.java            # Filter chain, in-memory users, role rules
+    │   │       │   ├── JwtUtil.java                   # Token generation & parsing (HS256)
+    │   │       │   ├── JwtAuthorizationFilter.java    # OncePerRequestFilter — validates JWT on each request
+    │   │       │   └── CorsConfig.java                # CORS bean (supplements SecurityConfig)
+    │   │       │
+    │   │       └── web/
+    │   │           ├── AuthController.java        # POST /api/auth/login
+    │   │           └── RentalRestController.java  # GET|POST /api/agences, GET /api/agences/{id}/vehicles, GET /api/vehicles/{id}
+    │   │
+    │   └── resources/
+    │       └── application.properties   # H2 console, datasource, JWT config
+    │
+    └── test/
+        └── java/ ...   # Test classes
 ```
 
 ---
@@ -236,11 +242,11 @@ spring.jpa.hibernate.ddl-auto=update
 
 ## 🌱 Sample Data (CommandLineRunner)
 
-On startup the application automatically seeds:
+On startup, `AarroubWijdaneExamJeeApplication` runs a `CommandLineRunner` bean that seeds the database with:
 
-- **4 agencies** — Casablanca, Rabat, Marrakech, Tanger
-- **8 vehicles** — mix of `Voiture` and `Moto` with varied statuses
-- **3 users** — one per role (in-memory via `InMemoryUserDetailsManager`)
+- Several **agencies** across different Moroccan cities
+- A mix of **Voiture** and **Moto** vehicles with varied statuses (`DISPONIBLE`, `LOUE`, `EN_MAINTENANCE`)
+- **3 in-memory users** — one per role — defined in `SecurityConfig` via `InMemoryUserDetailsManager`
 
 ---
 
@@ -254,6 +260,64 @@ On startup the application automatically seeds:
 | Swagger shows 401 | Click **Authorize** in Swagger UI and paste your JWT (without the `Bearer` prefix). |
 
 ---
+
+## 🔭 Roadmap & Future Enhancements
+
+The items below are **not yet implemented**. They represent the natural next steps to turn this exam project into a production-grade application.
+
+---
+
+### 🔒 Security
+
+| # | Enhancement | Notes |
+|---|---|---|
+| 1 | **Refresh tokens** | Issue a short-lived access token (15 min) alongside a long-lived refresh token (7 days) stored in an `HttpOnly` cookie. Add `POST /api/auth/refresh` and `POST /api/auth/logout` endpoints. |
+| 2 | **Persistent users in DB** | Replace `InMemoryUserDetailsManager` with a `User` entity + `UserRepository`. Hash passwords with **BCrypt** via `PasswordEncoder`. |
+| 3 | **User registration endpoint** | `POST /api/auth/register` — allows self-service sign-up with `ROLE_CLIENT` by default. |
+| 4 | **Account management** | Endpoints to update email/password, enable/disable accounts (admin only). |
+| 5 | **Rate limiting** | Use **Bucket4j** or Spring's `RateLimiter` to throttle `/api/auth/login` against brute-force attacks. |
+
+---
+
+### 🗃 Data & Persistence
+
+| # | Enhancement | Notes |
+|---|---|---|
+| 6 | **Pagination & filtering** | Add `Pageable` support to `GET /api/agences` and `GET /api/agences/{id}/vehicles`. Accept query params `?page=0&size=10&status=DISPONIBLE&sort=prixParJour,asc`. |
+| 7 | **Full rental lifecycle** | Complete `Location` CRUD: `PUT /api/locations/{id}/return` to mark a vehicle returned, auto-update its status to `DISPONIBLE`. |
+| 8 | **Soft delete** | Add `deletedAt` timestamp to entities. Filter deleted records out of all queries with `@Where(clause = "deleted_at IS NULL")`. |
+| 9 | **Audit logging** | Integrate **Spring Data Envers** (`@Audited`) to record who created/modified/deleted each record and when. |
+| 10 | **Redis caching** | Cache `GET /api/agences` and per-agency vehicle lists with `@Cacheable`. Evict on mutations with `@CacheEvict`. |
+| 11 | **Flyway migrations** | Replace `hibernate.ddl-auto=create-drop` with **Flyway** versioned SQL scripts (`V1__init.sql`, `V2__seed.sql`) for repeatable, tracked schema evolution. |
+| 12 | **Additional enums** | Extract `typeCarburant` (ESSENCE, DIESEL, HYBRIDE, ELECTRIQUE), `boiteVitesse` (MANUELLE, AUTOMATIQUE), and `typeMoto` (SPORTIVE, SCOOTER, ROADSTER, TOURING) from plain strings into proper `@Enumerated(EnumType.STRING)` fields, mirroring the existing `VehicleStatus` pattern. |
+
+---
+
+### 📊 Business Features
+
+| # | Enhancement | Notes |
+|---|---|---|
+| 12 | **Statistics endpoints** | `GET /api/stats/revenue` — total revenue per agency per month. `GET /api/stats/top-vehicles` — most rented vehicles. Aggregate with JPQL or native queries. |
+| 13 | **PDF invoice generation** | On rental creation, generate a PDF receipt using **iText** or **JasperReports** and return it as `application/pdf`. |
+| 14 | **Email notifications** | Send a booking confirmation email via **Spring Mail** (SMTP / SendGrid) when a location is created or a vehicle returned. |
+| 15 | **Vehicle photo upload** | `POST /api/vehicles/{id}/photo` — accept `multipart/form-data`, store on disk or **AWS S3**, return a public URL saved in the entity. |
+| 16 | **Availability calendar** | `GET /api/vehicles/{id}/availability?from=2025-01-01&to=2025-01-31` — return booked date ranges so the frontend can show a calendar picker. |
+
+---
+
+### ⚙️ Infrastructure & Quality
+
+| # | Enhancement | Notes |
+|---|---|---|
+| 17 | **Docker & Docker Compose** | Containerise the app. `docker-compose.yml` with services `backend`, `mysql` (or `postgres`), and optionally `redis`. |
+| 18 | **CI/CD with GitHub Actions** | `.github/workflows/ci.yml` — on every push: compile, run tests, build Docker image, push to registry. |
+| 19 | **Unit & integration tests** | Service layer with **JUnit 5 + Mockito**. Repository layer with **@DataJpaTest**. Full stack with **Testcontainers** + a real MySQL container. |
+| 20 | **Spring Actuator** | Expose `/actuator/health`, `/actuator/info`, `/actuator/metrics`. Secure non-health endpoints to `ROLE_ADMIN`. |
+| 21 | **Global exception handler** | `@RestControllerAdvice` returning consistent `{ "status", "message", "timestamp" }` JSON for all errors (404, 400, 403, 500). |
+| 22 | **Request validation** | Add `@Valid` + Jakarta Bean Validation (`@NotBlank`, `@Min`, `@Future`) on all incoming DTOs with a unified error response body. |
+
+---
+
 
 
 ---
