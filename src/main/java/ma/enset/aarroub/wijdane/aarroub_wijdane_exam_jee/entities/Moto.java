@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@DiscriminatorValue("VOI")
+@DiscriminatorValue("MOT")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class Voiture extends Vehicle {
-    private int nombrePortes;
-    private String typeCarburant;
-    private String boiteVitesse;
+public class Moto extends Vehicle {
+    private int cylindree;
+    private String typeMoto;
+    private boolean casqueInclus;
 }
