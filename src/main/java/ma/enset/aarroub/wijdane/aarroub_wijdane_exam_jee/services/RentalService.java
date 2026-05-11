@@ -9,4 +9,6 @@ public interface RentalService {
     List<AgenceDTO> getAllAgences();
     List<VehicleDTO> getVehiclesByAgence(Long agenceId);
     VehicleDTO getVehicleById(Long id);
+
+    List<VehicleDTO> getAllVehicles();
 }

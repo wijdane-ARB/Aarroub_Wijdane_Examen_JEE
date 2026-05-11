@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RentalServiceImpl implements RentalService {
 
-    private AgenceRepository agenceRepository;
-    private VehicleRepository vehicleRepository;
-    private RentalMapper rentalMapper;
+    private final AgenceRepository agenceRepository;
+    private final VehicleRepository vehicleRepository;
+    private final RentalMapper rentalMapper;
 
     @Override
     public AgenceDTO saveAgence(AgenceDTO agenceDTO) {
@@ -42,9 +42,10 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     public List<VehicleDTO> getVehiclesByAgence(Long agenceId) {
-        Agence agence = agenceRepository.findById(agenceId)
-                .orElseThrow(() -> new RuntimeException("Agence not found"));
-        return agence.getVehicles().stream()
+        List<Vehicle> vehicles = vehicleRepository.findByAgenceId(agenceId);
+        log.info("Found {} vehicles for agence ID: {}", vehicles.size(), agenceId);
+
+        return vehicles.stream()
                 .map(rentalMapper::fromVehicle)
                 .collect(Collectors.toList());
     }
@@ -54,5 +55,12 @@ public class RentalServiceImpl implements RentalService {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         return rentalMapper.fromVehicle(vehicle);
+    }
+
+    @Override
+    public List<VehicleDTO> getAllVehicles() {
+        return vehicleRepository.findAll().stream()
+                .map(rentalMapper::fromVehicle)
+                .collect(Collectors.toList());
     }
 }

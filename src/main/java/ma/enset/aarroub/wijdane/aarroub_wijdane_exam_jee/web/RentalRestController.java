@@ -26,6 +26,11 @@ public class RentalRestController {
         return rentalService.saveAgence(agenceDTO);
     }
 
+    @GetMapping("/vehicles")
+    public List<VehicleDTO> getAllVehicles() {
+        return rentalService.getAllVehicles();
+    }
+
     @GetMapping("/agences/{id}/vehicles")
     public List<VehicleDTO> getVehiclesByAgence(@PathVariable Long id) {
         return rentalService.getVehiclesByAgence(id);
@@ -35,4 +40,5 @@ public class RentalRestController {
     public VehicleDTO getVehicleById(@PathVariable Long id) {
         return rentalService.getVehicleById(id);
     }
+
 }

@@ -25,16 +25,18 @@ public class RentalMapper {
     }
 
     public VehicleDTO fromVehicle(Vehicle vehicle) {
-        VehicleDTO vehicleDTO = new VehicleDTO();
-        BeanUtils.copyProperties(vehicle, vehicleDTO);
+        VehicleDTO dto = new VehicleDTO();
+        BeanUtils.copyProperties(vehicle, dto);
+
         if (vehicle instanceof Voiture) {
-            vehicleDTO.setType("Voiture");
+            dto.setType("Voiture");
         } else if (vehicle instanceof Moto) {
-            vehicleDTO.setType("Moto");
+            dto.setType("Moto");
         }
+
         if (vehicle.getAgence() != null) {
-            vehicleDTO.setAgenceId(vehicle.getAgence().getId());
+            dto.setAgenceId(vehicle.getAgence().getId());
         }
-        return vehicleDTO;
+        return dto;
     }
 }
